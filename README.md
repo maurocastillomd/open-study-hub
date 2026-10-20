@@ -14,6 +14,8 @@ Everything runs in your browser. There is no account, no server and no database.
 - **Sources:** upload PDF, text or Markdown files. Claude reads them and writes lessons, questions and flashcards, then the plan updates.
 - **Progress:** score by area against your quick check, lessons done, cards learned, study streak, and backup download and restore.
 
+**Try it:** https://maurocastillomd.github.io/open-study-hub/
+
 It ships with a small sample about how to study, so you can try everything before you upload your own material.
 
 ## Run it on your computer
