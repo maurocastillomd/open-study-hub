@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson pictures preview</title>
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/iso.css">
+  <style>main { max-width: 760px; } .preview + .preview { margin-top: 30px; }</style>
+</head>
+<body>
+  <main id="out"></main>
+  <script type="module">
+    // Every picture kind at a few part counts, for checking by eye: open with ?theme=dark for dark.
+    import {mountFigure} from '../js/figures.js';
+    const theme = new URLSearchParams(location.search).get('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    const parts = n => Array.from({length: n}, (_, i) => ({label: `Part ${i + 1}`, detail: 'Detail'}));
+    const cases = [['steps', 4], ['steps', 6], ['cycle', 4], ['cycle', 3], ['compare', 2], ['layers', 4], ['layers', 6], ['compare', 3]];
+    const out = document.getElementById('out');
+    for (const [kind, n] of cases) {
+      const box = document.createElement('section');
+      box.className = 'preview';
+      box.innerHTML = `<p class="eyebrow">${kind} · ${n} parts</p><div class="lesson-figure iso" data-theme="${theme}"><div class="iso-plate"><div class="fig"></div></div></div>`;
+      out.append(box);
+      mountFigure(box.querySelector('.fig'), {kind, parts: parts(n)}, {tour: false});
+    }
+  </script>
+</body>
+</html>

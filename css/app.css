@@ -129,26 +129,21 @@ main { max-width: 1040px; width: 100%; margin: 0 auto; padding: 40px 44px 100px;
 .points { padding-left: 20px; }
 .points li { margin-bottom: 8px; }
 
-/* Lesson visuals */
-.visual { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 22px; margin: 18px 0 24px; }
-.visual figcaption { font-size: 14px; color: var(--muted); margin-top: 14px; }
-.parts { display: flex; gap: 10px; align-items: stretch; }
-.part { flex: 1 1 0; min-width: 0; border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: var(--bg); text-align: left; cursor: pointer; transition: border-color .2s var(--ease), background .2s var(--ease); }
-.part:hover, .part[aria-expanded="true"] { border-color: var(--accent); background: var(--light); }
-.part b { display: block; font-size: 15px; }
-.part .num { font-family: var(--mono); font-size: 11px; color: var(--accent); }
-.part span.detail { display: block; font-size: 14px; color: var(--muted); margin-top: 6px; }
-.part[aria-expanded="false"] span.detail { display: none; }
-.arrow { align-self: center; color: var(--accent); font-size: 20px; flex: none; }
-.v-steps .parts, .v-cycle .parts { flex-wrap: nowrap; }
-.v-cycle .return { text-align: center; color: var(--accent); font-size: 14px; margin-top: 10px; }
-.v-compare .parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-.v-layers .parts { flex-direction: column; align-items: center; }
-.v-layers .part { width: 100%; }
-@media (max-width: 640px) {
-  .v-steps .parts, .v-cycle .parts { flex-direction: column; }
-  .arrow { transform: rotate(90deg); }
-}
+/* Lesson pictures: Anatomy kit figures (css/iso.css), set on the app's paper */
+.lesson-figure { margin: 18px 0 26px; }
+.lesson-figure.iso[data-theme] { --anatomy-card: var(--paper); --anatomy-paper: var(--paper); --anatomy-page: var(--bg); }
+.lesson-figure .iso-plate { border-radius: var(--radius-lg); box-shadow: none; border: 1px solid var(--line); padding: 44px 16px 40px; }
+.lesson-figure .iso-svg { max-width: 640px; }
+.lesson-figure figcaption { margin-top: 10px; }
+.figure-parts { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.figure-parts button { width: 100%; display: flex; gap: 12px; align-items: flex-start; text-align: left; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--paper); cursor: pointer; min-height: 52px; transition: border-color .2s var(--ease), background .2s var(--ease); }
+.figure-parts button[aria-pressed="true"] { border-color: var(--accent); background: var(--light); }
+@media (hover: hover) { .figure-parts button:hover { border-color: var(--accent); } }
+.figure-parts .num { font-family: var(--mono); font-size: 12px; color: var(--accent); padding-top: 2px; }
+.figure-parts b { display: block; }
+.figure-parts .detail { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+.lesson-figure[data-reveal="one"] .figure-parts button[aria-pressed="false"] .detail { display: none; }
+@media (max-width: 560px) { .lesson-figure .iso-plate { padding: 40px 4px 64px; } }
 
 /* Quiz and cards */
 .question { font-size: 19px; font-weight: 600; margin-bottom: 16px; }
