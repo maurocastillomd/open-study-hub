@@ -12,11 +12,11 @@ export const samplePack = {
   ],
   lessons: [
     {
-      id: 'l-retrieval', domain: 'memory', title: 'Pull it out, don\'t pour it in',
-      summary: 'Recalling an answer from memory builds memory faster than reading it again.',
+      id: 'l-retrieval', domain: 'memory', title: 'Test yourself instead of rereading',
+      summary: 'Answering from memory helps you learn more than reading the same page again.',
       keyPoints: [
         'Rereading feels productive because the page looks familiar, but familiar is not the same as remembered.',
-        'Each time you pull a fact out of memory, the path back to it gets stronger.',
+        'Each time you recall a fact, it gets easier to recall the next time.',
         'Close the book, write or say what you know, then check. The check is where you learn.',
       ],
       visual: {kind: 'cycle', caption: 'One round of retrieval practice', parts: [
@@ -42,7 +42,7 @@ export const samplePack = {
         {label: 'Day 0', detail: 'Learn it.'},
         {label: 'Day 1', detail: 'First review. Expect to have forgotten some.'},
         {label: 'Day 3', detail: 'Second review. Recall is easier.'},
-        {label: 'Day 7', detail: 'Third review. Now it sticks.'},
+        {label: 'Day 7', detail: 'Third review. Now you remember it well.'},
       ]},
       body: [
         'Cramming can work for tomorrow, but most of it is gone a week later. Spacing feels harder because you have partly forgotten the material each time you return. That small struggle is what makes the memory last.',
@@ -69,7 +69,7 @@ export const samplePack = {
       ],
     },
     {
-      id: 'l-exam', domain: 'exam', title: 'Read the question twice',
+      id: 'l-exam', domain: 'exam', title: 'Read each question carefully',
       summary: 'Most avoidable errors come from misreading the question, not from missing knowledge.',
       keyPoints: [
         'Find what the question actually asks before you look at the answers.',
@@ -98,7 +98,7 @@ export const samplePack = {
     {id: 'q9', domain: 'exam', stem: 'Two answers both look correct. How do you choose?', choices: ['Pick the one with the most detail', 'Pick the one that answers the exact question asked', 'Pick answer C', 'Pick the first one you read'], answer: 1, explanation: 'A true statement that answers a different question is still wrong.'},
   ],
   flashcards: [
-    {id: 'f1', domain: 'memory', front: 'Retrieval practice', back: 'Pulling information out of memory, for example by self-testing, to make it stick.'},
+    {id: 'f1', domain: 'memory', front: 'Retrieval practice', back: 'Answering from memory, for example with flashcards or practice questions, so you remember longer.'},
     {id: 'f2', domain: 'memory', front: 'Spacing effect', back: 'Reviews spread over days produce longer-lasting memory than one long session.'},
     {id: 'f3', domain: 'memory', front: 'Why rereading misleads you', back: 'It builds familiarity, which feels like knowing but fades without recall.'},
     {id: 'f4', domain: 'planning', front: 'Interleaving', back: 'Mixing different topics in one session so you practise choosing the right idea.'},
