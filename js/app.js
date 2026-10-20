@@ -3,6 +3,7 @@ import {buildPlan, domainStrength, isoDate, addDays, daysBetween, questionsFor} 
 import {review, dueCards, mastered} from './cards.js';
 import {MODELS, MAX_FILE_BYTES, buildRequest, streamMessage, mergePack, readFileForRequest} from './generate.js';
 import {samplePack} from '../content/sample-pack.js';
+import {mountFigure} from './figures.js';
 
 let state = load();
 if (!state.pack) state.pack = structuredClone(samplePack);
@@ -37,6 +38,7 @@ const ICONS = {
   practiceBlock: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4.5 4.5L19 7"/></svg>',
 };
 
+const resolvedTheme = () => state.settings.theme !== 'auto' ? state.settings.theme : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 function applyTheme() {
   const t = state.settings.theme;
   if (t === 'auto') document.documentElement.removeAttribute('data-theme');
@@ -234,17 +236,44 @@ function learnView() {
 }
 const visualLabel = k => ({steps: 'Process', cycle: 'Cycle', compare: 'Comparison', layers: 'Layers'}[k] || 'Lesson');
 
-function visualHtml(v, hideDetails) {
+// The lesson picture is a small machine drawn with the Anatomy kit (js/figures.js).
+// Under it, a numbered list of the parts; the picked part is lit in the drawing.
+function figureShell(l, idx, hideDetails) {
+  const v = l.visual;
   if (!v?.parts?.length) return '';
-  const kind = v.kind || 'steps';
-  const sep = kind === 'steps' || kind === 'cycle' ? '<span class="arrow" aria-hidden="true">→</span>' : '';
-  const parts = v.parts.map((p, i) => `<button type="button" class="part" data-action="toggle-part" aria-expanded="${hideDetails ? 'false' : 'true'}">
-      <span class="num">${kind === 'compare' ? '' : String(i + 1).padStart(2, '0')}</span><b>${esc(p.label)}</b><span class="detail">${esc(p.detail)}</span></button>`);
-  return `<figure class="visual v-${kind}" style="margin-left:0;margin-right:0">
-    <div class="parts">${parts.join(sep)}</div>
-    ${kind === 'cycle' ? '<div class="return" aria-hidden="true">↺ then back to 01</div>' : ''}
-    <figcaption>${esc(v.caption)}${hideDetails ? ' · Tap each part to see what it means.' : ''}</figcaption>
+  const parts = v.parts.slice(0, 6);
+  return `<figure class="lesson-figure iso" data-theme="${resolvedTheme()}" data-reveal="${hideDetails ? 'one' : 'all'}">
+    <div class="iso-plate">
+      <div class="iso-plate-corners" aria-hidden="true">
+        <span class="iso-plate-corner" data-corner="fig">Lesson ${idx + 1}</span>
+        <span class="iso-plate-corner" data-corner="title" id="figure-title"></span>
+        <span class="iso-plate-corner" data-corner="hint">Tap a part</span>
+        <span class="iso-plate-corner" data-corner="readout" id="figure-readout"></span>
+      </div>
+      <div id="lesson-figure"></div>
+    </div>
+    <ol class="figure-parts" id="figure-parts">${parts.map((p, i) => `<li><button type="button" data-action="pick-part" data-i="${i}" aria-pressed="${i === 0}">
+      <span class="num">${String(i + 1).padStart(2, '0')}</span><span><b>${esc(p.label)}</b><span class="detail">${esc(p.detail)}</span></span></button></li>`).join('')}</ol>
+    ${v.caption ? `<figcaption class="small muted">${esc(v.caption)}</figcaption>` : ''}
   </figure>`;
+}
+
+let liveFigure = null;
+function mountLessonFigure(l) {
+  liveFigure?.destroy();
+  liveFigure = null;
+  const host = document.getElementById('lesson-figure');
+  if (!host) return;
+  const readout = document.getElementById('figure-readout');
+  const buttons = [...document.querySelectorAll('[data-action="pick-part"]')];
+  const show = i => {
+    readout.textContent = `${liveFigure ? liveFigure.reading(i) : ''}`;
+    buttons.forEach((b, j) => b.setAttribute('aria-pressed', String(i === j)));
+  };
+  // A visual learner picks the parts in turn; everyone else sees a slow tour that stops on a tap.
+  liveFigure = mountFigure(host, l.visual, {onSelect: show, tour: state.profile.style !== 'visual'});
+  document.getElementById('figure-title').textContent = liveFigure.title;
+  show(0);
 }
 
 function lessonView(id) {
@@ -254,7 +283,7 @@ function lessonView(id) {
   const list = state.pack.lessons;
   const idx = list.indexOf(l);
   const next = list[idx + 1];
-  const visual = visualHtml(l.visual, style === 'visual');
+  const visual = figureShell(l, idx, style === 'visual');
   const reading = `<div class="prose">${l.body.map(p => `<p>${esc(p)}</p>`).join('')}</div>`;
   const points = `<h2>Key points</h2><ul class="points">${l.keyPoints.map(k => `<li>${esc(k)}</li>`).join('')}</ul>`;
   const related = state.pack.questions.filter(q => q.domain === l.domain).length;
@@ -575,7 +604,7 @@ function openSettings() {
   document.body.append(dlg);
   const form = dlg.querySelector('form');
   form.model.addEventListener('change', () => { state.settings.model = form.model.value; persist(); });
-  form.theme.addEventListener('change', () => { state.settings.theme = form.theme.value; persist(); applyTheme(); });
+  form.theme.addEventListener('change', () => { state.settings.theme = form.theme.value; persist(); render(); });
   dlg.addEventListener('click', e => {
     const a = e.target.closest('[data-action]')?.dataset.action;
     if (a === 'save-key') {
@@ -616,6 +645,8 @@ function render() {
   else { view = todayView(); tab = 'today'; }
   app.innerHTML = shell(tab, view);
   if (route === 'sources') bindSources();
+  if (route === 'learn' && arg) mountLessonFigure(state.pack.lessons.find(x => x.id === arg));
+  else { liveFigure?.destroy(); liveFigure = null; }
   document.getElementById('import-input')?.addEventListener('change', async e => {
     const f = e.target.files[0];
     if (!f) return;
@@ -645,7 +676,7 @@ app.addEventListener('click', e => {
     'card-grade': () => gradeCard(el.dataset.knew === '1'),
     'end-session': () => { if (session?.type === 'quiz' && session.i > 0) finishQuiz(); else { session = null; location.hash = '#practice'; render(); } },
     'clear-session': () => { session = null; },
-    'toggle-part': () => el.setAttribute('aria-expanded', el.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'),
+    'pick-part': () => liveFigure?.select(Number(el.dataset.i)),
     'lesson-done': () => {
       state.progress.lessonsDone[el.dataset.id] = today();
       if (sessionStorage.getItem('studyhub.block') === 'learn') { markStudied('learn'); sessionStorage.removeItem('studyhub.block'); } else persist();
@@ -671,6 +702,7 @@ window.addEventListener('hashchange', () => {
   document.getElementById('main')?.focus?.();
   window.scrollTo(0, 0);
 });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => state.settings.theme === 'auto' && state.profile && render());
 window.addEventListener('beforeunload', e => { if (building?.running) { e.preventDefault(); e.returnValue = ''; } });
 
 render();

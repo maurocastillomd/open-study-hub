@@ -49,7 +49,7 @@ export function buildRequest({fileName, fileType, data, profile, existingDomains
     'Group the material into exam domains. Give each domain a weight from 1 to 5 for how much of the exam it likely covers, based on the source.',
     existingDomains.length ? `The hub already has these domains. Reuse a name exactly when the material fits it: ${existingDomains.join('; ')}.` : '',
     'Write 3 to 8 lessons. Each lesson has a one-sentence summary, 3 to 5 key points, 2 or 3 body paragraphs, and a visual.',
-    'Visual kinds: steps (an ordered process), cycle (a repeating loop), compare (two or three things side by side), layers (parts that build on each other). Choose the kind that matches the idea.',
+    'Visual kinds: steps (an ordered process, 2 to 6 parts), cycle (a repeating loop, 2 to 6 parts), compare (exactly two things side by side), layers (parts that build on each other, the first part being the base, 2 to 6 parts). Choose the kind that matches the idea. The hub draws each kind as a small machine, so keep part labels to one to three words.',
     'Write 10 to 25 multiple-choice questions. Each has exactly 4 choices, one correct answer given as its index from 0 to 3, and an explanation of why it is right.',
     'Write 10 to 30 flashcards with a short front and a one or two sentence back.',
     'Every lesson, question and flashcard names one of your domains exactly in its domain field.',

@@ -84,3 +84,20 @@ test('requests use structured output, and fallbacks only where offered', () => {
   assert.equal(haiku.body.messages[0].content[0].source.type, 'text');
   assert.match(haiku.body.system, /Reuse a name exactly/);
 });
+
+test('every picture kind draws for 2 to 6 parts with no broken numbers', async () => {
+  const {figureFor} = await import('../js/figures.js');
+  for (const kind of ['steps', 'cycle', 'compare', 'layers', 'unknown']) {
+    for (let n = 2; n <= 6; n++) {
+      const fig = figureFor({kind, parts: Array.from({length: n}, (_, i) => ({label: `P${i}`, detail: ''}))});
+      for (let active = 0; active < (kind === 'compare' && n === 2 ? 2 : n); active++) {
+        fig.snap(active);
+        const svg = fig.body(active).join('');
+        assert.ok(svg.length > 5000, `${kind} ${n}`);
+        assert.ok(!/NaN|undefined|Infinity/.test(svg), `${kind} ${n} ${active}`);
+        assert.equal((svg.match(/data-lit=""/g) || []).length, 1, `${kind} ${n} ${active}: exactly one lit part`);
+        assert.match(fig.reading(active), /\S/);
+      }
+    }
+  }
+});
