@@ -164,7 +164,8 @@ main:focus { outline: none; }
 
 /* Lesson pictures: Anatomy kit figures (css/iso.css), set on the app's paper */
 .lesson-figure { margin: 18px 0 26px; }
-.lesson-figure.iso[data-theme] { --anatomy-card: var(--paper); --anatomy-paper: var(--paper); --anatomy-page: var(--bg); }
+.lesson-figure.iso[data-theme] { --anatomy-card: var(--paper); --anatomy-paper: var(--paper); --anatomy-page: var(--bg); --anatomy-lit: var(--accent); }
+.lesson-figure .iso-solid[data-lit] > .iso-edge { stroke-width: 1.4px; }
 .lesson-figure .iso-plate { border-radius: var(--radius-lg); box-shadow: none; border: 1px solid var(--line); padding: 44px 16px 40px; }
 .lesson-figure .iso-svg { max-width: 640px; }
 .lesson-figure figcaption { margin-top: 10px; }

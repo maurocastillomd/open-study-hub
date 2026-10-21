@@ -80,7 +80,9 @@ export function paintOrder(parts, P) {
 }
 
 function partSvg(p, P, lit) {
-  const S = (paths, style) => k.solidSvg(paths, {tone: TONE[p.tone], crease: p.tone === 'subject' ? 'lo' : 'faint', lit, className: p.link >= 0 ? 'pick' : undefined, ...style});
+  // Pieces that belong to a step stay quiet until their step is picked, so the lit ones stand out.
+  const tone = p.link >= 0 ? 'mid' : TONE[p.tone];
+  const S = (paths, style) => k.solidSvg(paths, {tone, crease: p.tone === 'subject' ? 'lo' : 'faint', lit, className: p.link >= 0 ? 'pick' : undefined, ...style});
   const L = (d, style) => k.lineSvg(d, style);
   const D = (pts, style) => k.dotsSvg(pts, style);
   const at = q => k.iso(q, P);
