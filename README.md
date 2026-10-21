@@ -12,6 +12,7 @@ Everything runs in your browser. There is no account, no server and no database.
 - **Learn:** each lesson opens with a picture of its main idea, drawn as a small working machine with the [Anatomy](https://github.com/wheresryan22/anatomy) figure kit: gauge blocks under a dial for steps, a rotary index table for a cycle, a balance for a comparison and a chest of drawers for layers. Tap a part and the machine shows it. Lessons built from your uploads get the same pictures.
 - **Practice:** multiple-choice questions with explanations, weakest area first or mixed, plus flashcards on a spaced schedule (1, 3, 7, 14 and 30 days).
 - **Sources:** upload PDF, text or Markdown files. Claude reads them and writes lessons, questions and flashcards, then the plan updates.
+- **Top bar:** hide or show the menu, switch day and night, open your bookmarks, and search every lesson, question and flashcard (press / to jump to search). Save any lesson, question or card with its bookmark button.
 - **Progress:** score by area against your quick check, lessons done, cards learned, study streak, and backup download and restore.
 
 **Try it:** https://maurocastillomd.github.io/open-study-hub/
@@ -71,6 +72,7 @@ Good to know:
 | `js/figures.js` | The lesson pictures, built for 2 to 6 parts |
 | `js/vendor/anatomy/` | The Anatomy isometric figure kit (MIT, see its LICENSE) |
 | `css/iso.css` | The kit's figure styles |
+| `js/search.js` | Search across lessons, questions and flashcards |
 | `js/cards.js` | Flashcard spacing |
 | `js/generate.js` | The Claude request, reply checks and merging into your hub |
 | `js/store.js` | Saving, backup and restore |
