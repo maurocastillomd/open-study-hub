@@ -101,3 +101,15 @@ test('every picture kind draws for 2 to 6 parts with no broken numbers', async (
     }
   }
 });
+
+test('search finds lessons, questions and cards, best title matches first', async () => {
+  const {searchPack} = await import('../js/search.js');
+  const hits = searchPack(samplePack, 'spaced review');
+  assert.ok(hits.length > 0);
+  assert.ok(hits.every(h => ['lesson', 'question', 'card'].includes(h.type)));
+  assert.equal(searchPack(samplePack, 'Retrieval')[0].type !== undefined, true);
+  assert.equal(searchPack(samplePack, 'x').length, 0, 'one letter is too short');
+  assert.equal(searchPack(samplePack, 'zebra unicorn').length, 0);
+  const title = searchPack(samplePack, 'interleaving');
+  assert.equal(title[0].id, 'f4', 'a flashcard titled with the word ranks above body-only matches');
+});
