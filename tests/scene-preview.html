@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson object preview</title>
+  <link rel="stylesheet" href="../css/iso.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <style>main { max-width: 760px; }</style>
+</head>
+<body>
+  <main id="out"></main>
+  <script type="module">
+    // Draws one lesson object for checking by eye. Set window.__VISUAL (with .scene) before load,
+    // or pass ?theme=dark. Used by the scene review script.
+    import {mountFigure} from '../js/figures.js';
+    const theme = new URLSearchParams(location.search).get('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    const visual = window.__VISUAL;
+    const active = Number(new URLSearchParams(location.search).get('active') || 0);
+    const out = document.getElementById('out');
+    out.innerHTML = `<div class="lesson-figure iso" data-theme="${theme}"><div class="iso-plate"><div class="iso-plate-corners"><span class="iso-plate-corner" data-corner="title" id="t"></span></div><div id="fig"></div></div></div>`;
+    const fig = mountFigure(document.getElementById('fig'), visual, {tour: false});
+    fig.select(active, true);
+    document.getElementById('t').textContent = fig.title;
+    window.__READY = true;
+  </script>
+</body>
+</html>
