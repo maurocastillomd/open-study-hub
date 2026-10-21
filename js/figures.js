@@ -8,6 +8,7 @@
 
 import * as k from './vendor/anatomy/iso-kit.mjs';
 import * as G from './vendor/anatomy/lathe.mjs';
+import {cleanScene, sceneFigure} from './scene.js';
 
 const W = 600;
 const H = 360;
@@ -512,8 +513,23 @@ function layersFigure(n) {
 
 // ---------- mounting ----------
 
+// A lesson's own object, drawn from the parts list Claude wrote for it (js/scene.js).
+function objectFigure(scene, n) {
+  const fig = sceneFigure(scene, {W, H});
+  return {
+    title: scene.object || 'Lesson object',
+    label: `${scene.object || 'An object'} built for this lesson. Each step lights the piece of the object it belongs to.`,
+    body: active => [fig.base, fig.draw(active)],
+    snap() {},
+    step() { return true; },
+    reading: active => `part ${num(active)} of ${num(n - 1)}`,
+  };
+}
+
 export function figureFor(visual) {
   const n = Math.max(2, Math.min(6, visual?.parts?.length || 0));
+  const scene = cleanScene(visual?.scene, n);
+  if (scene) return objectFigure(scene, n);
   const kind = visual?.kind;
   if (kind === 'steps') return stepsFigure(n);
   if (kind === 'cycle') return cycleFigure(n);

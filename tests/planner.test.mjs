@@ -113,3 +113,27 @@ test('search finds lessons, questions and cards, best title matches first', asyn
   const title = searchPack(samplePack, 'interleaving');
   assert.equal(title[0].id, 'f4', 'a flashcard titled with the word ranks above body-only matches');
 });
+
+test('a lesson object is checked, kept through merging, and lights only its linked pieces', async () => {
+  const {cleanScene} = await import('../js/scene.js');
+  const {figureFor} = await import('../js/figures.js');
+  assert.equal(cleanScene({parts: [{shape: 'box', at: [0, 0, 0], size: [10, 10, 10]}]}, 2), null, 'too few parts');
+  const scene = {object: 'Force plate', azimuth: 45, parts: [
+    {shape: 'box', at: [0, 0, 0], size: [80, 60, 6], tone: 'structure', detail: 'screws', link: -1, axis: 'z'},
+    {shape: 'box', at: [0, 0, 6], size: [60, 40, 4], tone: 'subject', detail: 'groove', link: 0, axis: 'z'},
+    {shape: 'rod', at: [30, 0, 3], size: [3, 0, 40], tone: 'structure', detail: 'none', link: 1, axis: 'x'},
+    {shape: 'screen', at: [80, 0, 0], size: [30, 20, 18], tone: 'subject', detail: 'none', link: 1, axis: 'z'},
+    {shape: 'nonsense', at: [0, 0, 0], size: [1, 1, 1]},
+    {shape: 'dial', at: [-60, 30, 0], size: [20, 20, 8], tone: 'subject', detail: 'none', link: 9, axis: 'z'},
+  ]};
+  const clean = cleanScene(scene, 2);
+  assert.equal(clean.parts.length, 5, 'unknown shapes are dropped');
+  assert.equal(clean.parts.at(-1).link, -1, 'links past the last part are cut');
+  const fig = figureFor({kind: 'steps', parts: [{label: 'Plate'}, {label: 'Readout'}], scene});
+  assert.equal(fig.title, 'Force plate');
+  const svg = fig.body(1).join('');
+  assert.ok(!/NaN|undefined/.test(svg));
+  assert.equal((svg.match(/data-lit=""/g) || []).length, 2, 'both pieces linked to part 2 are lit');
+  const generated = {domains: [{name: 'Testing', weight: 3}], lessons: [{domain: 'Testing', title: 'T', summary: 'S', keyPoints: [], body: [], visual: {kind: 'steps', caption: '', parts: [{label: 'a', detail: ''}, {label: 'b', detail: ''}], scene}}], questions: [], flashcards: []};
+  assert.equal(mergePack(null, generated, 'x.pdf').lessons[0].visual.scene.object, 'Force plate');
+});
