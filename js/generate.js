@@ -1,3 +1,5 @@
+import {SHAPES, DETAILS, cleanScene} from './scene.js';
+
 // Turns an uploaded source (PDF, text or Markdown) into domains, lessons, questions and flashcards
 // with the Claude API. The call goes straight from this page to Anthropic with the key the
 // person saved in Settings. There is no server in between.
@@ -14,6 +16,7 @@ export const MODELS = [
 const FALLBACK_MODELS = new Set(['claude-opus-5-5', 'claude-sonnet-5-5']);
 
 const visualKinds = ['steps', 'cycle', 'compare', 'layers'];
+const num3 = {type: 'array', items: {type: 'number'}};
 const obj = (properties) => ({type: 'object', additionalProperties: false, required: Object.keys(properties), properties});
 const str = {type: 'string'};
 
@@ -22,7 +25,21 @@ export const PACK_SCHEMA = obj({
   lessons: {type: 'array', items: obj({
     domain: str, title: str, summary: str,
     keyPoints: {type: 'array', items: str},
-    visual: obj({kind: {type: 'string', enum: visualKinds}, caption: str, parts: {type: 'array', items: obj({label: str, detail: str})}}),
+    visual: obj({
+      kind: {type: 'string', enum: visualKinds}, caption: str, parts: {type: 'array', items: obj({label: str, detail: str})},
+      // The lesson's own object, drawn by js/scene.js.
+      scene: obj({
+        object: str,
+        azimuth: {type: 'number'},
+        parts: {type: 'array', items: obj({
+          shape: {type: 'string', enum: SHAPES}, at: num3, size: num3,
+          axis: {type: 'string', enum: ['x', 'y', 'z']},
+          tone: {type: 'string', enum: ['base', 'structure', 'subject']},
+          detail: {type: 'string', enum: DETAILS},
+          link: {type: 'integer'},
+        })},
+      }),
+    }),
     body: {type: 'array', items: str},
   })},
   questions: {type: 'array', items: obj({domain: str, stem: str, choices: {type: 'array', items: str}, answer: {type: 'integer'}, explanation: str})},
@@ -50,6 +67,8 @@ export function buildRequest({fileName, fileType, data, profile, existingDomains
     existingDomains.length ? `The hub already has these domains. Reuse a name exactly when the material fits it: ${existingDomains.join('; ')}.` : '',
     'Write 3 to 8 lessons. Each lesson has a one-sentence summary, 3 to 5 key points, 2 or 3 body paragraphs, and a visual.',
     'Visual kinds: steps (an ordered process, 2 to 6 parts), cycle (a repeating loop, 2 to 6 parts), compare (exactly two things side by side), layers (parts that build on each other, the first part being the base, 2 to 6 parts). Choose the kind that matches the idea. The hub draws each kind as a small machine, so keep part labels to one to three words.',
+    'Each visual also has a scene: a real, recognisable physical object from the lesson\'s own subject, built from simple parts, that shows the idea. Use equipment, tools or instruments of the field (for a lesson on jump testing: a force plate with its cable and a readout; for sleep: a bed, a pillow and a sleep tracker). Never a generic diagram, chart or stack of slabs.',
+    'Scene rules: world units, x and y across the bench from -100 to 100, z up from 0 to 140; the hub adds the bench under it. 8 to 30 parts. at is [x, y, z] of the bottom centre for box, screen, cylinder and dial, and the start of the centre line for rod. size is [width, depth, height] for box and screen, [diameter, diameter, height] for cylinder and dial, and [thickness, 0, length] for rod. axis matters only for rod. Every part rests on the bench or on another part. tone: base for supports, structure for frames, subject for the pieces the lesson is about. detail adds screws, a groove, knurl, ticks, vents or label lines. link is the index of the visual part (0 for the first) that this piece shows, or -1; every visual part has at least one linked piece. azimuth 30 to 60 turns the view.',
     'Write 10 to 25 multiple-choice questions. Each has exactly 4 choices, one correct answer given as its index from 0 to 3, and an explanation of why it is right.',
     'Write 10 to 30 flashcards with a short front and a one or two sentence back.',
     'Every lesson, question and flashcard names one of your domains exactly in its domain field.',
@@ -170,7 +189,7 @@ export function mergePack(pack, generated, sourceName, {replaceSample = true} = 
     base.lessons.push({
       id: id('l'), domain, source: sourceName, title: clean(l.title), summary: clean(l.summary),
       keyPoints: (l.keyPoints || []).map(clean).filter(Boolean),
-      visual: {kind: visualKinds.includes(l.visual?.kind) ? l.visual.kind : 'steps', caption: clean(l.visual?.caption), parts},
+      visual: {kind: visualKinds.includes(l.visual?.kind) ? l.visual.kind : 'steps', caption: clean(l.visual?.caption), parts, scene: cleanScene(l.visual?.scene, parts.length)},
       body: (l.body || []).map(clean).filter(Boolean),
     });
   }
