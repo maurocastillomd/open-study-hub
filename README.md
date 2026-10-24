@@ -89,6 +89,15 @@ Run the tests with `npm test` (Node.js 20 or later).
 4. Daily minutes are split by learning style (for example, visual: 45% learning, 25% flashcards, 30% questions). In the final seven days the split becomes 15% / 30% / 55%. The day before the exam is a 30-minute card review.
 5. Scores use your quick check plus your last three tries at each practice question, so fixed mistakes stop counting against you.
 
+## Disclaimer
+
+- Study Hub is a study aid. It is not affiliated with, endorsed by or connected to any exam or certification body. Exam and certification names belong to their owners.
+- Lessons, questions and flashcards built by AI can contain mistakes. Check anything important against your own sources. Nothing here is professional, medical or legal advice, and using it does not guarantee any exam result.
+- You are responsible for what you upload. Only use material you own or have permission to use, and keep what the hub builds for your own study. The project never receives your files: they go from your browser to Anthropic under your own API key and Anthropic's terms.
+- The software is provided "as is", without warranty of any kind, as set out in the MIT license.
+
+Security details and how to report a problem: [SECURITY.md](SECURITY.md). Third-party code: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

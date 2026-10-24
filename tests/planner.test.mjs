@@ -137,3 +137,24 @@ test('a lesson object is checked, kept through merging, and lights only its link
   const generated = {domains: [{name: 'Testing', weight: 3}], lessons: [{domain: 'Testing', title: 'T', summary: 'S', keyPoints: [], body: [], visual: {kind: 'steps', caption: '', parts: [{label: 'a', detail: ''}, {label: 'b', detail: ''}], scene}}], questions: [], flashcards: []};
   assert.equal(mergePack(null, generated, 'x.pdf').lessons[0].visual.scene.object, 'Force plate');
 });
+
+test('a crafted backup cannot smuggle markup or odd settings into the hub', async () => {
+  const {importBackup} = await import('../js/store.js');
+  const evil = '"><img src=x onerror=alert(1)>';
+  const restored = importBackup(JSON.stringify({app: 'open-study-hub', state: {
+    profile: {name: 'A', certification: 'B', examDate: '2026-12-01', hoursPerDay: 2, style: evil},
+    settings: {theme: evil, model: evil},
+    pack: {title: 'T', domains: [{id: 'ok', name: 'Fine', weight: 3}, {id: evil, name: 'Bad'}],
+      lessons: [{id: evil, domain: 'ok', title: 'x'}, {id: 'l1', domain: 'ok', title: 'Kept', visual: {parts: []}}],
+      questions: [{id: 'q1', domain: 'ok', stem: 's', choices: ['a', 'b'], answer: 1}], flashcards: []},
+    progress: {bookmarks: {x: {type: 'lesson', id: evil}}, answers: {[evil]: [{correct: true}]}},
+  }}));
+  assert.equal(restored.settings.theme, 'auto');
+  assert.equal(restored.settings.model, 'claude-opus-5-5');
+  assert.equal(restored.profile.style, 'mixed');
+  assert.deepEqual(restored.pack.domains.map(d => d.id), ['ok']);
+  assert.deepEqual(restored.pack.lessons.map(l => l.id), ['l1']);
+  assert.equal(Object.keys(restored.progress.bookmarks).length, 0);
+  assert.equal(Object.keys(restored.progress.answers).length, 0);
+  assert.throws(() => importBackup('{"app":"other"}'));
+});

@@ -140,7 +140,7 @@ function setupView() {
         <input name="name" required autocomplete="given-name" value="${esc(p.name)}" placeholder="First name">
       </label>
       <label class="field">Certification or exam
-        <input name="certification" required value="${esc(p.certification)}" placeholder="For example: CSCS, PMP, Step 1">
+        <input name="certification" required value="${esc(p.certification)}" placeholder="The name of your exam or certification">
       </label>
       <label class="field">Exam date
         <input name="examDate" type="date" required min="${min}" value="${esc(p.examDate || addDays(min, 42))}">
@@ -269,7 +269,7 @@ function learnView() {
       const lessons = state.pack.lessons.filter(l => l.domain === dm.id);
       if (!lessons.length) return '';
       return `<h2>${esc(dm.name)} <span class="badge ${s[dm.id] != null && s[dm.id] < 0.6 ? 'warn' : ''}">${s[dm.id] == null ? 'not checked yet' : `${pct(s[dm.id])} correct`}</span></h2>
-      <div class="grid-cards">${lessons.map(l => `<a class="lesson-link" href="#learn/${l.id}"><div class="card">
+      <div class="grid-cards">${lessons.map(l => `<a class="lesson-link" href="#learn/${esc(l.id)}"><div class="card">
         <span class="eyebrow">${done[l.id] ? '✓ Done' : visualLabel(l.visual?.kind)}</span>
         <h3>${esc(l.title)}</h3><p class="small muted" style="margin:0">${esc(l.summary)}</p></div></a>`).join('')}</div>`;
     }).join('')}`;
@@ -334,9 +334,9 @@ function lessonView(id) {
     <p class="lede">${esc(l.summary)}</p>
     ${order.join('')}
     <div class="row" style="margin-top:28px">
-      <button class="btn primary" data-action="lesson-done" data-id="${l.id}">${state.progress.lessonsDone[l.id] ? '✓ Done' : 'Mark as done'}</button>
-      ${related ? `<button class="btn" data-action="quiz-domain" data-domain="${l.domain}">Practice this area</button>` : ''}
-      ${next ? `<a class="btn ghost" href="#learn/${next.id}">Next: ${esc(next.title)} →</a>` : ''}
+      <button class="btn primary" data-action="lesson-done" data-id="${esc(l.id)}">${state.progress.lessonsDone[l.id] ? '✓ Done' : 'Mark as done'}</button>
+      ${related ? `<button class="btn" data-action="quiz-domain" data-domain="${esc(l.domain)}">Practice this area</button>` : ''}
+      ${next ? `<a class="btn ghost" href="#learn/${esc(next.id)}">Next: ${esc(next.title)} →</a>` : ''}
     </div>
     ${l.source ? `<p class="small muted" style="margin-top:24px">Built from your source: ${esc(l.source)}</p>` : ''}`;
 }
@@ -358,7 +358,7 @@ function practiceView() {
       const nq = state.pack.questions.filter(q => q.domain === dm.id).length;
       const nc = state.pack.flashcards.filter(c => c.domain === dm.id).length;
       return `<div class="card row between" style="padding:14px 18px"><div><b>${esc(dm.name)}</b><div class="small muted">${nq} questions · ${nc} cards · ${s[dm.id] == null ? 'not checked yet' : `${pct(s[dm.id])} correct`}</div></div>
-        <div class="row"><button class="btn" data-action="quiz-domain" data-domain="${dm.id}" ${nq ? '' : 'disabled'}>Questions</button><button class="btn" data-action="cards-domain" data-domain="${dm.id}" ${nc ? '' : 'disabled'}>Cards</button></div></div>`;
+        <div class="row"><button class="btn" data-action="quiz-domain" data-domain="${esc(dm.id)}" ${nq ? '' : 'disabled'}>Questions</button><button class="btn" data-action="cards-domain" data-domain="${esc(dm.id)}" ${nc ? '' : 'disabled'}>Cards</button></div></div>`;
     }).join('')}</div>
     <p class="small muted" style="margin-top:20px"><a href="#diagnostic">Retake the quick check</a> to reset where your plan puts the most time.</p>`;
 }
@@ -521,7 +521,7 @@ function sourcesView() {
         <button class="btn primary" data-action="build" ${building?.running || !building?.files?.length || !key ? 'disabled' : ''}>${building?.running ? 'Building…' : 'Build my hub from these files'}</button>
         ${building?.running ? '<button class="btn ghost" data-action="cancel-build">Stop</button>' : ''}
       </div>
-      <p class="small muted" style="margin-top:12px">Files go straight from this browser to Anthropic with your key, using ${esc(MODELS.find(m => m.id === state.settings.model)?.label || state.settings.model)}. Use material you have the right to study from. Each file costs a small amount of API credit.</p>
+      <p class="small muted" style="margin-top:12px">Files go straight from this browser to Anthropic with your key, using ${esc(MODELS.find(m => m.id === state.settings.model)?.label || state.settings.model)}. Only upload material you own or have permission to use, and keep what the hub builds for your own study. Anthropic's terms apply to what you send. Each file costs a small amount of API credit.</p>
     </section>
     <h2>In your hub now</h2>
     <p>${plural(pack.domains.length, 'area')} · ${plural(pack.lessons.length, 'lesson')} · ${plural(pack.questions.length, 'question')} · ${plural(pack.flashcards.length, 'flashcard')}</p>
@@ -638,6 +638,8 @@ function openSettings() {
     <label class="field">Theme
       <select name="theme">${[['auto', 'Match my device'], ['light', 'Light'], ['dark', 'Dark']].map(([v, l]) => `<option value="${v}" ${state.settings.theme === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
     </label>
+    <h3>About</h3>
+    <p class="small muted" style="margin:0">Study Hub is free, open-source software (MIT license), offered as is. It is not affiliated with or endorsed by any exam or certification body. Lessons, questions and cards built by AI can contain mistakes, so check anything important against your own sources. It is a study aid, not professional, medical or legal advice.</p>
     <h3>Start over</h3>
     <div class="row"><button class="btn ghost danger" type="button" data-action="reset">Erase everything in this browser</button></div>
   </form>`;
@@ -663,7 +665,7 @@ function openSettings() {
 
 // ---------- search ----------
 const TYPE_LABEL = {lesson: 'Lesson', question: 'Question', card: 'Flashcard'};
-const hrefOf = r => r.type === 'lesson' ? `#learn/${r.id}` : null;
+const hrefOf = r => r.type === 'lesson' ? `#learn/${esc(r.id)}` : null;
 function resultRow(r, extra = '') {
   const open = r.type === 'lesson'
     ? `<a class="result-title" href="${hrefOf(r)}">${esc(r.title)}</a>`
@@ -747,7 +749,7 @@ function render() {
     if (!f) return;
     try {
       const restored = importBackup(await f.text());
-      if (confirm('Replace everything in this browser with this backup?')) { state = restored; persist(); render(); }
+      if (confirm('Replace everything in this browser with this backup?')) { state = restored; if (!state.pack) state.pack = structuredClone(samplePack); persist(); render(); }
     } catch (err) { alert(err.message); }
   });
 }
