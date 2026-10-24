@@ -25,10 +25,10 @@ You need a simple web server, because browsers block these files when opened str
 
 ```bash
 cd study-hub-open-source
-python3 -m http.server 4173
+python3 -m http.server 4173 --bind 127.0.0.1
 ```
 
-Then open http://localhost:4173 in your browser. If you prefer Node.js, `npm start` does the same.
+Then open http://127.0.0.1:4173 in your browser. If you prefer Node.js, `npm start` does the same. Both commands serve the hub to this computer only, not to other devices on your network.
 
 ## Put it online for free
 
@@ -54,6 +54,16 @@ Good to know:
 - Requests use structured output, so every reply is checked against a fixed shape before it enters your hub. Opus and Sonnet requests also ask Anthropic to retry on a fallback model if a request is declined.
 - Only upload material you have the right to use. The generated lessons stay in your browser.
 - Don't save your key on a shared or public computer. Remove it from Settings when you are done.
+
+## Keeping your API key safe
+
+The key sits in this browser's local storage so the page can call Anthropic directly. That design has limits, so treat the key as something that could leak:
+
+- Any script running on this page could read it. The hub loads no outside scripts, and a Content-Security-Policy in `index.html` lets the page run only its own files and talk only to `api.anthropic.com`. Lesson text from Claude and restored backups are shown as plain text, never as code.
+- Browser extensions with access to every site can read local storage too. Use a browser profile without such extensions if you can.
+- Make a separate key just for this hub, in its own workspace, and give that workspace a low monthly spend limit in the Anthropic Console. If you think it leaked, delete the key in the console; a new one takes a minute.
+- Only restore backups you made yourself. A backup is your own data, so a file from someone else replaces your hub with theirs.
+- If you host your own copy, keep the policy line in `index.html`. Hosts such as Netlify or Cloudflare Pages can also send it as a header, which adds `frame-ancestors 'none'` protection a meta tag can't give.
 
 ## Your data
 
