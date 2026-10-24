@@ -220,7 +220,7 @@ function todayView() {
       <section class="card">
         <p class="eyebrow">${esc(p.certification)}</p>
         <div class="countdown"><span class="stat">${Math.max(0, pl.daysLeft)}</span><span class="muted">day${pl.daysLeft === 1 ? '' : 's'} to go</span></div>
-        <p class="small muted">${fmtDate(p.examDate)} · ${p.hoursPerDay} h a day · ${STYLES[p.style][0]} learner</p>
+        <p class="small muted">${fmtDate(p.examDate)} · ${esc(p.hoursPerDay)} h a day · ${esc((STYLES[p.style] || STYLES.mixed)[0])} learner</p>
         <div class="row" style="gap:18px;margin-top:10px">
           <div><div class="stat" style="font-size:26px">${streak()}</div><div class="small muted">day streak</div></div>
           <div><div class="stat" style="font-size:26px">${due}</div><div class="small muted">cards due</div></div>
@@ -269,7 +269,7 @@ function learnView() {
       const lessons = state.pack.lessons.filter(l => l.domain === dm.id);
       if (!lessons.length) return '';
       return `<h2>${esc(dm.name)} <span class="badge ${s[dm.id] != null && s[dm.id] < 0.6 ? 'warn' : ''}">${s[dm.id] == null ? 'not checked yet' : `${pct(s[dm.id])} correct`}</span></h2>
-      <div class="grid-cards">${lessons.map(l => `<a class="lesson-link" href="#learn/${l.id}"><div class="card">
+      <div class="grid-cards">${lessons.map(l => `<a class="lesson-link" href="#learn/${esc(l.id)}"><div class="card">
         <span class="eyebrow">${done[l.id] ? '✓ Done' : visualLabel(l.visual?.kind)}</span>
         <h3>${esc(l.title)}</h3><p class="small muted" style="margin:0">${esc(l.summary)}</p></div></a>`).join('')}</div>`;
     }).join('')}`;
@@ -334,9 +334,9 @@ function lessonView(id) {
     <p class="lede">${esc(l.summary)}</p>
     ${order.join('')}
     <div class="row" style="margin-top:28px">
-      <button class="btn primary" data-action="lesson-done" data-id="${l.id}">${state.progress.lessonsDone[l.id] ? '✓ Done' : 'Mark as done'}</button>
+      <button class="btn primary" data-action="lesson-done" data-id="${esc(l.id)}">${state.progress.lessonsDone[l.id] ? '✓ Done' : 'Mark as done'}</button>
       ${related ? `<button class="btn" data-action="quiz-domain" data-domain="${l.domain}">Practice this area</button>` : ''}
-      ${next ? `<a class="btn ghost" href="#learn/${next.id}">Next: ${esc(next.title)} →</a>` : ''}
+      ${next ? `<a class="btn ghost" href="#learn/${esc(next.id)}">Next: ${esc(next.title)} →</a>` : ''}
     </div>
     ${l.source ? `<p class="small muted" style="margin-top:24px">Built from your source: ${esc(l.source)}</p>` : ''}`;
 }
@@ -358,7 +358,7 @@ function practiceView() {
       const nq = state.pack.questions.filter(q => q.domain === dm.id).length;
       const nc = state.pack.flashcards.filter(c => c.domain === dm.id).length;
       return `<div class="card row between" style="padding:14px 18px"><div><b>${esc(dm.name)}</b><div class="small muted">${nq} questions · ${nc} cards · ${s[dm.id] == null ? 'not checked yet' : `${pct(s[dm.id])} correct`}</div></div>
-        <div class="row"><button class="btn" data-action="quiz-domain" data-domain="${dm.id}" ${nq ? '' : 'disabled'}>Questions</button><button class="btn" data-action="cards-domain" data-domain="${dm.id}" ${nc ? '' : 'disabled'}>Cards</button></div></div>`;
+        <div class="row"><button class="btn" data-action="quiz-domain" data-domain="${esc(dm.id)}" ${nq ? '' : 'disabled'}>Questions</button><button class="btn" data-action="cards-domain" data-domain="${esc(dm.id)}" ${nc ? '' : 'disabled'}>Cards</button></div></div>`;
     }).join('')}</div>
     <p class="small muted" style="margin-top:20px"><a href="#diagnostic">Retake the quick check</a> to reset where your plan puts the most time.</p>`;
 }
@@ -623,7 +623,7 @@ function openSettings() {
   dlg.innerHTML = `<form method="dialog" class="sheet-body" id="settings-form">
     <div class="row between"><h2>Settings</h2><button class="icon-btn" value="close" aria-label="Close">✕</button></div>
     <h3>Profile</h3>
-    <p class="small muted" style="margin:0">${esc(state.profile.name)} · ${esc(state.profile.certification)} · exam ${fmtDate(state.profile.examDate)} · ${state.profile.hoursPerDay} h a day · ${STYLES[state.profile.style][0]}</p>
+    <p class="small muted" style="margin:0">${esc(state.profile.name)} · ${esc(state.profile.certification)} · exam ${fmtDate(state.profile.examDate)} · ${esc(state.profile.hoursPerDay)} h a day · ${esc((STYLES[state.profile.style] || STYLES.mixed)[0])}</p>
     <a class="btn" href="#setup" data-action="close-settings">Edit profile and exam date</a>
     <h3>Anthropic API key</h3>
     <label class="field">Key for building lessons from your sources
@@ -666,7 +666,7 @@ const TYPE_LABEL = {lesson: 'Lesson', question: 'Question', card: 'Flashcard'};
 const hrefOf = r => r.type === 'lesson' ? `#learn/${r.id}` : null;
 function resultRow(r, extra = '') {
   const open = r.type === 'lesson'
-    ? `<a class="result-title" href="${hrefOf(r)}">${esc(r.title)}</a>`
+    ? `<a class="result-title" href="${esc(hrefOf(r))}">${esc(r.title)}</a>`
     : `<button class="result-title link-btn" data-action="${r.type === 'question' ? 'quiz-one' : 'cards-one'}" data-id="${esc(r.id)}">${esc(r.title)}</button>`;
   return `<li class="result"><div><span class="eyebrow">${TYPE_LABEL[r.type]} · ${esc(domainName(r.domain))}</span>${open}
     ${r.snippet ? `<p class="small muted">${esc(r.snippet)}</p>` : ''}</div>${extra || markButton(r.type, r.id, TYPE_LABEL[r.type].toLowerCase())}</li>`;
